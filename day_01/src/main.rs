@@ -18,14 +18,13 @@ fn main() -> Result<()> {
     let args = Args::parse();
     let file = File::open(args.path)?;
     let reader = BufReader::new(file);
-    let input = reader.lines().map(|c_item| c_item.unwrap()).collect::<Vec<String>>();
 
     let mut left_list = Vec::new();
     let mut right_list = Vec::new();
-    for row in input.into_iter() {
-        let splits: Vec<_> = row.split("   ").collect();
-        left_list.push(splits[0].parse::<usize>()?);
-        right_list.push(splits[1].parse::<usize>()?);
+    for line in reader.lines().map_while(Result::ok) {
+        let mut splits = line.split("   ");
+        left_list.push(splits.next().unwrap().parse::<usize>()?);
+        right_list.push(splits.next().unwrap().parse::<usize>()?);
     }
     left_list.sort();
     right_list.sort();
