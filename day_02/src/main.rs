@@ -18,44 +18,64 @@ enum Mode {
     SMALLER
 }
 
+fn is_valid(input: Vec<i32>) -> bool {
+    let mut last: Option<i32> = None;
+    let mut set_mode: Option<Mode> = None;
+    let mut valid = true;
+    for current in input {
+        if let Some(last) = last {
+            let diff = current.abs_diff(last);
+            if 0 == diff || diff > 3 {
+                valid = false;
+                break;
+            }
+
+            let current_mode = if current > last {
+                Mode::GREATER
+            } else {
+                Mode::SMALLER
+            };
+            if let Some(set_mode) = set_mode {
+                if set_mode != current_mode {
+                    valid = false;
+                    break;
+                }
+            } else {
+                set_mode = Some(current_mode);
+            }
+        }
+        last = Some(current);
+    }
+    valid
+
+}
+
 fn main() -> Result<()> {
     let args = Args::parse();
     let file = File::open(args.path)?;
     let reader = BufReader::new(file);
-    
+
     let mut part_01 = 0;
+    let mut part_02 = 0;
     for line in reader.lines().map_while(Result::ok) {
-        let mut last: Option<u32> = None;
-        let mut set_mode: Option<Mode> = None;
-        let mut valid = true;
-        for c_split in line.split(" ") {
-            let current = c_split.parse::<u32>()?;
-            if let Some(last) = last {
-                let diff = current.abs_diff(last);
-                if 0 == diff || diff > 3 {
-                    valid = false;
+        let numbers = line.split(' ').map(|i| i.parse::<i32>().unwrap()).collect::<Vec<i32>>();
+        
+        if !is_valid(numbers.clone()) {
+            for i in 0..numbers.len() {
+                let mut c_numbers = numbers.clone();
+                c_numbers.remove(i);
+                if is_valid(c_numbers) {
+                    part_02 += 1;
                     break;
                 }
-                
-                let current_mode = if current > last {
-                    Mode::GREATER
-                } else {
-                    Mode::SMALLER
-                };
-                if let Some(set_mode) = set_mode {
-                    if set_mode != current_mode {
-                        valid = false;
-                        break
-                    }
-                } else {
-                    set_mode = Some(current_mode);
-                }
             }
-            last = Some(current);
+        } else {
+            part_02 += 1;
+            part_01 += 1;
         }
-        part_01 += valid as i32;
     }
     println!("Part1: {}", part_01);
+    println!("Part2: {}", part_02);
 
     Ok(())
 }
