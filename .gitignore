@@ -2,3 +2,4 @@
 /challenges
 .idea
 Cargo.lock
+*/target/*
