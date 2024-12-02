@@ -9,7 +9,7 @@ The benchmark on the table was run on a Ryzen 7 5800x.
 | Day | Part 1 | Part 2 | Execution Time |
 |-----|--------|--------|----------------|
 | 1   | solved | solved | 0.0205s        |
-| 2   | -      | -      |                |
+| 2   | solved | -      |                |
 | 3   | -      | -      |                |
 | 4   | -      | -      |                |
 | 5   | -      | -      |                |
