@@ -3,8 +3,6 @@ use std::io::{BufRead, BufReader};
 use clap::{arg, Parser};
 use anyhow::{Result};
 use std::string::String;
-use regex::Regex;
-use crate::Field::OTHER;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -21,20 +19,26 @@ enum Field {
     M,
     A,
     S,
-    OTHER(char)
+    Other(char)
 }
 
-fn is_correct_position(field: &Field, pos: isize) -> bool {
-    let out = match pos {
+fn is_correct_position_part1(field: &Field, pos: isize) -> bool {
+    match pos {
         0 => field == &Field::X,
         1 => field == &Field::M,
         2 => field == &Field::A,
         3 => field == &Field::S,
-        other => false
-    };
-    
-    //println!("{}", out);
-    out
+        _ => false
+    }
+}
+
+fn is_correct_position_part2(field: &Field, pos: isize) -> bool {
+    match pos {
+        0 => field == &Field::M,
+        1 => field == &Field::A,
+        2 => field == &Field::S,
+        _ => false
+    }
 }
 
 fn get_at_pos(lines: &[Vec<Field>], column: isize, row: isize) -> Option<Field> {
@@ -44,11 +48,23 @@ fn get_at_pos(lines: &[Vec<Field>], column: isize, row: isize) -> Option<Field> 
     None
 }
 
-fn check_change(lines: &[Vec<Field>], column: isize, row: isize, change_col: isize, change_row: isize) -> bool {
+fn check_change_part_1(lines: &[Vec<Field>], column: isize, row: isize, change_col: isize, change_row: isize) -> bool {
     let mut out = true;
     for i in 0..4 {
         if let Some(field) = get_at_pos(lines, column+(change_col*i), row+(change_row*i)) {
-            out &= is_correct_position(&field, i);
+            out &= is_correct_position_part1(&field, i);
+        } else {
+            out = false;
+        }
+    }
+    out
+}
+
+fn check_mas_part_2(lines: &[Vec<Field>], column: isize, row: isize, change_col: isize, change_row: isize) -> bool {
+    let mut out = true;
+    for i in 0..3 {
+        if let Some(field) = get_at_pos(lines, column+(change_col*i), row+(change_row*i)) {
+            out &= is_correct_position_part2(&field, i);
         } else {
             out = false;
         }
@@ -57,18 +73,28 @@ fn check_change(lines: &[Vec<Field>], column: isize, row: isize, change_col: isi
 }
 
 
-fn enumerate(lines: &[Vec<Field>], column: isize, row: isize) -> isize {
-    let mut out = check_change(lines, column, row, 1, 0) as isize; // right
-    out += check_change(lines, column, row, -1, 0) as isize; // left
-    out += check_change(lines, column, row, 0, 1) as isize; // down
-    out += check_change(lines, column, row, 0, -1) as isize; // up
-    out += check_change(lines, column, row, 1, 1) as isize; // down right
-    out += check_change(lines, column, row, 1, -1) as isize; // down left
-    out += check_change(lines, column, row, -1, -1) as isize; // up left
-    out += check_change(lines, column, row, -1, 1) as isize; // up right
+fn enumerate_part_01(lines: &[Vec<Field>], column: isize, row: isize) -> isize {
+    let mut out = check_change_part_1(lines, column, row, 1, 0) as isize; // right
+    out += check_change_part_1(lines, column, row, -1, 0) as isize; // left
+    out += check_change_part_1(lines, column, row, 0, 1) as isize; // down
+    out += check_change_part_1(lines, column, row, 0, -1) as isize; // up
+    out += check_change_part_1(lines, column, row, 1, 1) as isize; // down right
+    out += check_change_part_1(lines, column, row, 1, -1) as isize; // down left
+    out += check_change_part_1(lines, column, row, -1, -1) as isize; // up left
+    out += check_change_part_1(lines, column, row, -1, 1) as isize; // up right
     
     out
 }
+
+fn enumerate_part_02(lines: &[Vec<Field>], column: isize, row: isize) -> bool {
+    let mut out = check_mas_part_2(lines, column-1, row-1, 1, 1) as isize; // right
+    out += check_mas_part_2(lines, column+1, row+1, -1, -1) as isize; // left
+    out += check_mas_part_2(lines, column-1, row+1, 1, -1) as isize; // down
+    out += check_mas_part_2(lines, column+1, row-1, -1, 1) as isize; // up
+
+    out == 2
+}
+
 
 fn main() -> Result<()> {
     let args = Args::parse();
@@ -83,19 +109,22 @@ fn main() -> Result<()> {
                 'M' => Field::M,
                 'A' => Field::A,
                 'S' => Field::S,
-                c => Field::OTHER(c)
+                c => Field::Other(c)
             };
             c_row.push(field);
         }
         lines.push(c_row);
     }
-    let mut found_times: isize = 0;
+    let mut found_times_part1: isize = 0;
+    let mut found_times_part2: isize = 0;
     for (c_row_place, c_row) in &mut lines.iter().enumerate() {
-        for (c_col_place, c_col) in c_row.iter().enumerate() {
-            found_times += enumerate(&lines, c_row_place as isize, c_col_place as isize);
+        for (c_col_place, _) in c_row.iter().enumerate() {
+            found_times_part1 += enumerate_part_01(&lines, c_row_place as isize, c_col_place as isize);
+            found_times_part2 += enumerate_part_02(&lines, c_row_place as isize, c_col_place as isize) as isize;
         }
     }
-    println!("Part_01: {}", found_times);
+    println!("Part_01: {}", found_times_part1);
+    println!("Part_02: {}", found_times_part2);
 
     Ok(())
 }
