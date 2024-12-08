@@ -23,7 +23,7 @@ fn is_valid(point: (isize, isize), col_size: isize, row_size: isize) -> bool {
     false
 }
 
-fn calc_part_01(antennas: HashMap<char, Vec<(isize, isize)>>, col_size: isize, row_size: isize) -> i32 {
+fn calc_part_01(antennas: &HashMap<char, Vec<(isize, isize)>>, col_size: isize, row_size: isize) -> i32 {
     let mut out = HashSet::new();
     antennas.iter().for_each(|(_, antenna)| {
        antenna.iter().tuple_combinations::<(_, _)>().for_each(|(l, r)| {
@@ -39,6 +39,38 @@ fn calc_part_01(antennas: HashMap<char, Vec<(isize, isize)>>, col_size: isize, r
            }
        })
     });
+    out.len() as i32
+}
+
+fn calc_part_02(antennas: &HashMap<char, Vec<(isize, isize)>>, col_size: isize, row_size: isize) -> i32 {
+    let mut out = HashSet::new();
+    antennas.iter().for_each(|(_, antenna)| {
+        antenna.iter().tuple_combinations::<(_, _)>().for_each(|(l, r)| {
+            let r_to_l = (l.0 - r.0, l.1 - r.1);
+            let l_to_r = (r.0 - l.0, r.1 - l.1);
+            let mut counter = 0;
+            loop {
+                let point_1 = (l_to_r.0*counter+l.0, l_to_r.1*counter+l.1);
+                if is_valid(point_1, col_size, row_size) {
+                    out.insert(point_1);
+                } else {
+                    break;
+                }
+                counter += 1;
+            }
+            counter = 0;
+            loop {
+                let point_2 = (r_to_l.0*counter+r.0, r_to_l.1*counter+r.1);
+                if is_valid(point_2, col_size, row_size) {
+                    out.insert(point_2);
+                } else {
+                    break;
+                }
+                counter += 1;
+            }
+        })
+    });
+    //println!("{:#?}", out);
     out.len() as i32
 }
 
@@ -62,10 +94,11 @@ fn main() -> Result<()> {
         row_size +=1;
     }
 
-    let part_01 = calc_part_01(antennas, col_size as isize, row_size as isize);
+    let part_01 = calc_part_01(&antennas, col_size as isize, row_size as isize);
+    let part_02 = calc_part_02(&antennas, col_size as isize, row_size as isize);
     
     println!("Part_01: {}", part_01);
-    println!("Part_02: {}", 0);
+    println!("Part_02: {}", part_02);
 
     Ok(())
 }
