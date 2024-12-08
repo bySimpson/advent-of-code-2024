@@ -14,7 +14,7 @@ The benchmark on the table was run on a Ryzen 7 5800x.
 | 4   | solved | solved | 0.0205s        |
 | 5   | solved | solved | 0.0259s        |
 | 6   | solved | solved | 0.2073s        |
-| 7   | -      | -      |                |
+| 7   | solved | solved | 1.9113s        |
 | 8   | -      | -      |                |
 | 9   | -      | -      |                |
 | 10  | -      | -      |                |
